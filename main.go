@@ -1,12 +1,3 @@
-/*
-	Steps I need to understand to complete this part:
-
-1. How do I create a mechanism for user input?
-2. Once I have that input, should I pass it through a channel using a go routine?
-3. How does NewScanner increment through tokens and how does that work with the infinite for loop?
-4. Create commandHelp function to display the help command's output
-5. Create `commandExit` function to end the REPL environment and close the loop
-*/
 package main
 
 import (
@@ -72,27 +63,4 @@ func main() {
 			fmt.Println("Unknown command:", input)
 		}
 	}
-
-	// 	go func readInput(c cliCommand) {
-	// 		reader := bufio.NewScanner(os.Stdin)
-	// 		fmt.Print("Pokedex > ")
-	// 		for reader.Scan() {
-	// 			fmt.Println(reader.Text())
-	// 			ch <- reader.Text()
-	// 		}
-	// 	}()
-
-	// loop:
-	// 	for {
-	// 		input := <-ch
-	// 		switch {
-	// 		case input == "help":
-	// 			commandHelp()
-	// 		case input == "exit":
-	// 			commandExit()
-	// 		default:
-	// 			continue
-	// 		}
-	// 	}
-
 }
