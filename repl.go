@@ -2,12 +2,18 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 )
 
 func startRepl() {
+	cfg := config{
+		next:     "",
+		previous: "",
+	}
+
 	reader := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -23,7 +29,7 @@ func startRepl() {
 
 		cmdName, exists := getCommands()[cmd]
 		if exists {
-			err := cmdName.callback()
+			err := cmdName.callback(&cfg)
 			if err != nil { // redundant given schema for cliCommand struct, but keeping just in case.
 				fmt.Println(err)
 			}
@@ -66,8 +72,40 @@ func getCommands() map[string]cliCommand {
 	}
 }
 
+func printRes(c *config, resBody []byte) {
+	// UnMarshalling the data allows mapping of resp data to pokeLoc struct, making it easy to access the resp data.
+	loc := pokeLoc{}
+	err := json.Unmarshal(resBody, &loc)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Update pointer value of config struct to next and previous locations, allowing pagination through api locations
+	c.next = loc.Next
+	c.previous = loc.Previous
+
+	for _, v := range loc.Results {
+		fmt.Println(v.Name)
+	}
+}
+
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(c *config) error
+}
+
+type config struct {
+	next     string
+	previous any
+}
+
+type pokeLoc struct {
+	Count    int    `json:"count"`
+	Next     string `json:"next"`
+	Previous any    `json:"previous"`
+	Results  []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"results"`
 }
