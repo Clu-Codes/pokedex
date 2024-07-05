@@ -1,42 +1,42 @@
 package main
 
 import (
-	// "encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	// "github.com/mtslzr/pokeapi-go"
 )
 
-func commandMap(c *config) error {
-	// Use config struct to paginate through location api, starting with default url
-	var url string
-	if c.previous == "" {
-		url = "https://pokeapi.co/api/v2/location"
-	} else {
-		url = c.next
-	}
-
-	// TODO: Look into use of pokeapi-go lib here instead of manual call
-	res, err := http.Get(url)
-
+func commandMap(cfg *config) error {
+	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.next)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
-	defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
+	cfg.next = locationsResp.Next
+	cfg.previous = locationsResp.Previous
 
-	if res.StatusCode > 299 {
-		fmt.Printf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+	for _, loc := range locationsResp.Results {
+		fmt.Println(loc.Name)
 	}
+
+	return nil
+}
+
+func commandMapB(cfg *config) error {
+	if cfg.previous == nil {
+		return errors.New("No previous route available.")
+	}
+
+	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.previous)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
-	printRes(c, body)
+	cfg.next = locationResp.Next
+	cfg.previous = locationResp.Previous
 
-	fmt.Println()
+	for _, loc := range locationResp.Results {
+		fmt.Println(loc.Name)
+	}
 
 	return nil
 }
