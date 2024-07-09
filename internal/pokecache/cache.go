@@ -18,6 +18,17 @@ type cacheEntry struct {
 	val       []byte
 }
 
+type Ticker struct {
+	C <-chan time
+}
+
+func NewTicker(d time.Duration) *Ticker {
+	ticker := &Ticker{
+		C: d,
+	}
+	return ticker
+}
+
 func (ca *Cache) AddCache(key string, data []byte) error {
 	ca.mu.Lock()
 	entry := cacheEntry{
@@ -45,4 +56,10 @@ func NewCache(interval time.Duration) *Cache {
 	// TODO: Create reapLoop() to go here
 }
 
-// create reapLoop()
+func (ca *Cache) reapLoop(interval time.Duration) {
+	tick := time.NewTicker(5 * time.Second)
+	// TODO: Better understand how to create a Ticker.
+	// Determine how the ticker will run -- should I use infinite for loop?
+	// How do I determine when to stop the ticker / how do I stop the ticker?
+	// I need to also add the logic that will handle the clearing of cache if it is greater than the interval.
+}
