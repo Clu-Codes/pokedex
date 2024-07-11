@@ -2,8 +2,10 @@ package pokeapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 )
 
 func (c *Client) ListLocations(pageURL *string) (PokeLoc, error) {
@@ -26,6 +28,7 @@ func (c *Client) ListLocations(pageURL *string) (PokeLoc, error) {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
+	fmt.Printf("Body type: %v", reflect.TypeOf(body))
 	if err != nil {
 		return PokeLoc{}, err
 	}

@@ -7,15 +7,18 @@ import (
 	"strings"
 
 	"github.com/clu-codes/pokedex/internal/pokeapi"
+	"github.com/clu-codes/pokedex/internal/pokecache"
 )
 
 type config struct {
 	pokeapiClient pokeapi.Client
+	cache         *pokecache.Cache
 	next          *string
 	previous      *string
 }
 
 func startRepl(cfg *config) {
+	fmt.Println("Initiated!...")
 	reader := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -73,23 +76,6 @@ func getCommands() map[string]cliCommand {
 		},
 	}
 }
-
-// func printRes(c *config, resBody []byte) {
-// 	// UnMarshalling the data allows mapping of resp data to pokeLoc struct, making it easy to access the resp data.
-// 	loc := pokeLoc{}
-// 	err := json.Unmarshal(resBody, &loc)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-
-// 	// Update pointer value of config struct to next and previous locations, allowing pagination through api locations
-// 	c.next = loc.Next
-// 	c.previous = loc.Previous
-
-// 	for _, v := range loc.Results {
-// 		fmt.Println(v.Name)
-// 	}
-// }
 
 type cliCommand struct {
 	name        string

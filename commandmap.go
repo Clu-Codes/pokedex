@@ -6,6 +6,20 @@ import (
 )
 
 func commandMap(cfg *config) error {
+
+	/*
+		if cache, exists := cfg.cache.GetCache(*cfg.next); exists {
+			// TODO: Unmarhsal []byte from cache to PokeLoc{}
+
+			// cfg.next = cache.Next
+			// cfg.previous = cache.Previous
+
+			// for _, loc := range cache.Results {
+			// 	fmt.Println(loc.Name)
+			// }
+		}
+	*/
+
 	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.next)
 	if err != nil {
 		return err
@@ -23,7 +37,7 @@ func commandMap(cfg *config) error {
 
 func commandMapB(cfg *config) error {
 	if cfg.previous == nil {
-		return errors.New("No previous route available.")
+		return errors.New("no previous route available")
 	}
 
 	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.previous)
