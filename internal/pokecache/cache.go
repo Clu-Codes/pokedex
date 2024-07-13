@@ -18,17 +18,21 @@ type cacheEntry struct {
 	val       []byte
 }
 
-func (ca *Cache) AddCache(key string, data []byte) error {
+func (ca *Cache) AddCache(key *string, data []byte) error {
 	ca.mu.Lock()
 	entry := cacheEntry{
 		createdAt: time.Now(),
 		val:       data,
 	}
-	ca.CacheMap[key] = entry
+	url := "https://pokeapi.co/api/v2/location-area"
+	if key != nil {
+		url = *key
+	}
+	ca.CacheMap[url] = entry
 	ca.mu.Unlock()
 
-	if keyData, ok := ca.CacheMap[key]; ok {
-		fmt.Printf("cache entry: %v added successfully", keyData)
+	if keyData, ok := ca.CacheMap[url]; ok {
+		fmt.Printf("%v: cache entry added successfully \n", keyData.createdAt)
 	} else {
 		return errors.New("failed to add cache entry to cache")
 
@@ -53,30 +57,20 @@ func NewCache(interval time.Duration) *Cache {
 		CacheMap: make(map[string]cacheEntry),
 		duration: interval,
 	}
-	ca.reapLoop()
+	go ca.reapLoop()
 	return ca
 }
 
 func (ca *Cache) reapLoop() {
-	tick := time.NewTicker(5 * time.Second)
-	done := make(chan bool)
-
-	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			case <-tick.C:
-				for key, val := range ca.CacheMap {
-					if time.Duration(time.Since(val.createdAt).Seconds()) > ca.duration {
-						delete(ca.CacheMap, key)
-					}
-				}
+	ticker := time.NewTicker(ca.duration)
+	for range ticker.C {
+		ca.mu.Lock()
+		for key, entry := range ca.CacheMap {
+			if time.Since(entry.createdAt) > ca.duration {
+				delete(ca.CacheMap, key)
 			}
 		}
-	}()
-
-	time.Sleep(2 * time.Minute) // safeguard in place until I better understand how to close channel
-	done <- true
+		ca.mu.Unlock()
+	}
 
 }

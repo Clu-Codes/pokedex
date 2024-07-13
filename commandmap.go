@@ -1,29 +1,50 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/clu-codes/pokedex/internal/pokeapi"
 )
 
 func commandMap(cfg *config) error {
-
-	/*
+	if cfg.next == nil {
+		fmt.Println("cache miss; key does not exist in cache")
+	} else {
 		if cache, exists := cfg.cache.GetCache(*cfg.next); exists {
 			// TODO: Unmarhsal []byte from cache to PokeLoc{}
+			lData := pokeapi.PokeLoc{}
+			err := json.Unmarshal(cache, &lData)
+			if err != nil {
+				fmt.Printf("error unmarshalling cache data: %v", err)
+			}
 
-			// cfg.next = cache.Next
-			// cfg.previous = cache.Previous
+			fmt.Println("pulled from cache")
 
-			// for _, loc := range cache.Results {
-			// 	fmt.Println(loc.Name)
-			// }
+			cfg.next = lData.Next
+			cfg.previous = lData.Previous
+
+			for _, loc := range lData.Results {
+				fmt.Println(loc.Name)
+			}
+		} else {
+			fmt.Println("no cfg.next url exists in cache")
 		}
-	*/
+
+		return nil
+	}
 
 	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.next)
 	if err != nil {
 		return err
 	}
+
+	mData, err := json.Marshal(locationsResp)
+	if err != nil {
+		fmt.Printf("unable to cache response due to %v", err)
+	}
+	cfg.cache.AddCache(cfg.next, mData)
 
 	cfg.next = locationsResp.Next
 	cfg.previous = locationsResp.Previous
@@ -40,17 +61,46 @@ func commandMapB(cfg *config) error {
 		return errors.New("no previous route available")
 	}
 
-	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.previous)
-	if err != nil {
-		return err
+	if cache, exists := cfg.cache.GetCache(*cfg.previous); exists {
+		// TODO: Unmarhsal []byte from cache to PokeLoc{}
+		lData := pokeapi.PokeLoc{}
+		err := json.Unmarshal(cache, &lData)
+		if err != nil {
+			fmt.Printf("error unmarshalling cache data: %v", err)
+		}
+
+		fmt.Println("pulled from cache")
+
+		cfg.next = lData.Next
+		cfg.previous = lData.Previous
+
+		for _, loc := range lData.Results {
+			fmt.Println(loc.Name)
+		}
+
+		return nil
+
+	} else {
+		fmt.Println("no cfg.previous url exists in cache. querying results...")
+		locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.previous)
+		if err != nil {
+			return err
+		}
+
+		mData, err := json.Marshal(locationsResp)
+		if err != nil {
+			fmt.Printf("unable to cache response due to %v", err)
+		}
+		cfg.cache.AddCache(cfg.previous, mData)
+
+		cfg.next = locationsResp.Next
+		cfg.previous = locationsResp.Previous
+
+		for _, loc := range locationsResp.Results {
+			fmt.Println(loc.Name)
+		}
+
+		return nil
+
 	}
-
-	cfg.next = locationResp.Next
-	cfg.previous = locationResp.Previous
-
-	for _, loc := range locationResp.Results {
-		fmt.Println(loc.Name)
-	}
-
-	return nil
 }
