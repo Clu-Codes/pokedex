@@ -13,7 +13,6 @@ func commandMap(cfg *config) error {
 		fmt.Println("cache miss; key does not exist in cache")
 	} else {
 		if cache, exists := cfg.cache.GetCache(*cfg.next); exists {
-			// TODO: Unmarhsal []byte from cache to PokeLoc{}
 			lData := pokeapi.PokeLoc{}
 			err := json.Unmarshal(cache, &lData)
 			if err != nil {
@@ -68,7 +67,6 @@ func commandMapB(cfg *config) error {
 	}
 
 	if cache, exists := cfg.cache.GetCache(*cfg.previous); exists {
-		// TODO: Unmarhsal []byte from cache to PokeLoc{}
 		lData := pokeapi.PokeLoc{}
 		err := json.Unmarshal(cache, &lData)
 		if err != nil {
