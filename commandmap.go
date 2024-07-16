@@ -28,11 +28,11 @@ func commandMap(cfg *config) error {
 			for _, loc := range lData.Results {
 				fmt.Println(loc.Name)
 			}
+
+			return nil
 		} else {
 			fmt.Println("no cfg.next url exists in cache")
 		}
-
-		return nil
 	}
 
 	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.next)
@@ -44,7 +44,13 @@ func commandMap(cfg *config) error {
 	if err != nil {
 		fmt.Printf("unable to cache response due to %v", err)
 	}
-	cfg.cache.AddCache(cfg.next, mData)
+
+	url_key := pokeapi.BaseURL + "/location-area"
+	if cfg.next != nil {
+		url_key = *cfg.next
+	}
+
+	cfg.cache.AddCache(url_key, mData)
 
 	cfg.next = locationsResp.Next
 	cfg.previous = locationsResp.Previous
@@ -91,7 +97,7 @@ func commandMapB(cfg *config) error {
 		if err != nil {
 			fmt.Printf("unable to cache response due to %v", err)
 		}
-		cfg.cache.AddCache(cfg.previous, mData)
+		cfg.cache.AddCache(*cfg.previous, mData)
 
 		cfg.next = locationsResp.Next
 		cfg.previous = locationsResp.Previous

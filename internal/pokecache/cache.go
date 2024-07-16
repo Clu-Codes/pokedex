@@ -18,20 +18,22 @@ type cacheEntry struct {
 	val       []byte
 }
 
-func (ca *Cache) AddCache(key *string, data []byte) error {
+func (ca *Cache) AddCache(key string, data []byte) error {
 	ca.mu.Lock()
 	entry := cacheEntry{
 		createdAt: time.Now(),
 		val:       data,
 	}
-	url := "https://pokeapi.co/api/v2/location-area"
-	if key != nil {
-		url = *key
-	}
-	ca.CacheMap[url] = entry
+	// url := "https://pokeapi.co/api/v2/location-area"
+	// if key != nil {
+	// 	url = *key
+	// }
+	// ca.CacheMap[url] = entry
+	ca.CacheMap[key] = entry
 	ca.mu.Unlock()
 
-	if keyData, ok := ca.CacheMap[url]; ok {
+	// if keyData, ok := ca.CacheMap[url]; ok {
+	if keyData, ok := ca.CacheMap[key]; ok {
 		fmt.Printf("%v: cache entry added successfully \n", keyData.createdAt)
 	} else {
 		return errors.New("failed to add cache entry to cache")
