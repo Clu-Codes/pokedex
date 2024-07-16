@@ -9,8 +9,7 @@ import (
 
 type Cache struct {
 	CacheMap map[string]cacheEntry
-	mu       sync.Mutex
-	duration time.Duration
+	mu       *sync.Mutex
 }
 
 type cacheEntry struct {
@@ -20,19 +19,12 @@ type cacheEntry struct {
 
 func (ca *Cache) AddCache(key string, data []byte) error {
 	ca.mu.Lock()
-	entry := cacheEntry{
+	ca.CacheMap[key] = cacheEntry{
 		createdAt: time.Now(),
 		val:       data,
 	}
-	// url := "https://pokeapi.co/api/v2/location-area"
-	// if key != nil {
-	// 	url = *key
-	// }
-	// ca.CacheMap[url] = entry
-	ca.CacheMap[key] = entry
 	ca.mu.Unlock()
 
-	// if keyData, ok := ca.CacheMap[url]; ok {
 	if keyData, ok := ca.CacheMap[key]; ok {
 		fmt.Printf("%v: cache entry added successfully \n", keyData.createdAt)
 	} else {
@@ -46,29 +38,28 @@ func (ca *Cache) AddCache(key string, data []byte) error {
 func (ca *Cache) GetCache(key string) ([]byte, bool) {
 	ca.mu.Lock()
 	defer ca.mu.Unlock()
-	if v, ok := ca.CacheMap[key]; ok {
+	v, ok := ca.CacheMap[key]
+	if ok {
 		fmt.Println("Found cache...")
-		return v.val, true
-	} else {
-		return nil, false
 	}
+	return v.val, ok
 }
 
-func NewCache(interval time.Duration) *Cache {
-	ca := &Cache{
+func NewCache(interval time.Duration) Cache {
+	ca := Cache{
 		CacheMap: make(map[string]cacheEntry),
-		duration: interval,
+		mu:       &sync.Mutex{},
 	}
-	go ca.reapLoop()
+	go ca.reapLoop(interval)
 	return ca
 }
 
-func (ca *Cache) reapLoop() {
-	ticker := time.NewTicker(ca.duration)
+func (ca *Cache) reapLoop(interval time.Duration) {
+	ticker := time.NewTicker(interval)
 	for range ticker.C {
 		ca.mu.Lock()
 		for key, entry := range ca.CacheMap {
-			if time.Since(entry.createdAt) > ca.duration {
+			if time.Since(entry.createdAt) > interval {
 				delete(ca.CacheMap, key)
 			}
 		}

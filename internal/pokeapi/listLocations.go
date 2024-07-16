@@ -10,9 +10,17 @@ import (
 
 func (c *Client) ListLocations(pageURL *string) (PokeLoc, error) {
 	url := BaseURL + "/location-area"
-
 	if pageURL != nil {
 		url = *pageURL
+	}
+
+	if val, ok := c.cache.GetCache(url); ok {
+		locationsResp := PokeLoc{}
+		err := json.Unmarshal(val, &locationsResp)
+		if err != nil {
+			return PokeLoc{}, err
+		}
+		return locationsResp, nil
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -39,5 +47,6 @@ func (c *Client) ListLocations(pageURL *string) (PokeLoc, error) {
 		return PokeLoc{}, err
 	}
 
+	c.cache.AddCache(url, body)
 	return locationResp, nil
 }
