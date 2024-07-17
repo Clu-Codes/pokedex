@@ -28,12 +28,20 @@ func startRepl(cfg *config) {
 			continue
 		}
 
-		cmd := input[0]
+		if len(input) == 1 {
+			input = append(input, "")
+		}
+
+		// fmt.Println("Here's the input:", input)
+		// fmt.Println("First arg:", input[0])
+		// fmt.Println("Second arg:", input[1])
+
+		cmd, city := input[0], input[1]
 
 		cmdName, exists := getCommands()[cmd]
 		if exists {
-			err := cmdName.callback(cfg)
-			if err != nil { // redundant given schema for cliCommand struct, but keeping just in case.
+			err := cmdName.callback(cfg, city)
+			if err != nil {
 				fmt.Println(err)
 			}
 			continue
@@ -72,11 +80,16 @@ func getCommands() map[string]cliCommand {
 			description: "Returns the previous 20 locations. If no previous 20 exits, returns an error.",
 			callback:    commandMapB,
 		},
+		"explore": {
+			name:        "explore + {city}",
+			description: "Returns the pokemon that exists in that city.",
+			callback:    commandExplore,
+		},
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, string) error
 }

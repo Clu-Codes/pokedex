@@ -25,8 +25,8 @@ func (ca *Cache) AddCache(key string, data []byte) error {
 	}
 	ca.mu.Unlock()
 
-	if keyData, ok := ca.CacheMap[key]; ok {
-		fmt.Printf("%v: cache entry added successfully \n", keyData.createdAt)
+	if _, ok := ca.CacheMap[key]; ok {
+		fmt.Println("cache entry added successfully")
 	} else {
 		return errors.New("failed to add cache entry to cache")
 
