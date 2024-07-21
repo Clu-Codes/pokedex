@@ -2,18 +2,16 @@ package pokeapi
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 )
 
 func (c *Client) ListPokemon(city string) (CityPokemon, error) {
-	if city == "" {
-		return CityPokemon{}, errors.New("no city provider. please provide a city")
-	}
+	// if city == "" {
+	// 	return CityPokemon{}, errors.New("no city provider. please provide a city")
+	// }
 	url := BaseURL + "/location-area/" + city
-	// fmt.Println(url)
 
 	if val, ok := c.cache.GetCache(url); ok {
 		pokeResp := CityPokemon{}
@@ -37,7 +35,6 @@ func (c *Client) ListPokemon(city string) (CityPokemon, error) {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-	// fmt.Println(body)
 	if err != nil {
 		return CityPokemon{}, err
 	}
@@ -48,7 +45,6 @@ func (c *Client) ListPokemon(city string) (CityPokemon, error) {
 		return CityPokemon{}, err
 	}
 
-	// fmt.Println(pokeResp)
 	c.cache.AddCache(url, body)
 	return pokeResp, nil
 }

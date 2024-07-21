@@ -7,10 +7,12 @@ import (
 	"strings"
 
 	"github.com/clu-codes/pokedex/internal/pokeapi"
+	"github.com/clu-codes/pokedex/internal/pokedb"
 )
 
 type config struct {
 	pokeapiClient pokeapi.Client
+	pokedex       pokedb.Pokedex
 	next          *string
 	previous      *string
 }
@@ -31,11 +33,6 @@ func startRepl(cfg *config) {
 		if len(input) == 1 {
 			input = append(input, "")
 		}
-
-		// fmt.Println("Here's the input:", input)
-		// fmt.Println("First arg:", input[0])
-		// fmt.Println("Second arg:", input[1])
-
 		cmd, city := input[0], input[1]
 
 		cmdName, exists := getCommands()[cmd]
@@ -85,11 +82,16 @@ func getCommands() map[string]cliCommand {
 			description: "Returns the pokemon that exists in that city.",
 			callback:    commandExplore,
 		},
+		"catch": {
+			name:        "catch + {pokemon_name}",
+			description: "Throws a Pokeball at the desired pokemon, attempting to catch it.",
+			callback:    commandCatch,
+		},
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config, string) error
+	callback    func(*config, ...string) error
 }

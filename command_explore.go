@@ -1,15 +1,18 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
-func commandExplore(cfg *config, city string) error {
-	// fmt.Println(cfg.pokeapiClient.ListPokemon(city))
+func commandExplore(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("you must provide a location name")
+	}
+	city := args[0]
 	fmt.Printf("Exploring %s...\n", city)
 	pokemon, err := cfg.pokeapiClient.ListPokemon(city)
 	if err != nil {
-		fmt.Println("error found in commandExplore")
 		return err
 	}
 
