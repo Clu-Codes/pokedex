@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -26,11 +25,12 @@ func commandCatch(cfg *config, args ...string) error {
 	catch_chance := 100 - digits
 	if catch_chance > rand.Intn(100) {
 		fmt.Printf("%s was caught!\n", name)
-		data, err := json.Marshal(pokemon)
-		if err != nil {
-			fmt.Printf("attempted to add to pokedex but incurred: %v\n", err)
-		}
-		cfg.pokedex.AddPokemon(name, data)
+		cfg.caughtPokemon[name] = pokemon
+		// data, err := json.Marshal(pokemon)
+		// if err != nil {
+		// 	fmt.Printf("attempted to add to pokedex but incurred: %v\n", err)
+		// }
+		// cfg.pokedex.AddPokemon(name, data)
 
 	} else {
 		fmt.Printf("%s escaped!\n", name)

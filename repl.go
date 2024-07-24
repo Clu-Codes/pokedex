@@ -7,12 +7,11 @@ import (
 	"strings"
 
 	"github.com/clu-codes/pokedex/internal/pokeapi"
-	"github.com/clu-codes/pokedex/internal/pokedb"
 )
 
 type config struct {
 	pokeapiClient pokeapi.Client
-	pokedex       pokedb.Pokedex
+	caughtPokemon map[string]pokeapi.Pokemon
 	next          *string
 	previous      *string
 }
@@ -91,6 +90,11 @@ func getCommands() map[string]cliCommand {
 			name:        "inspect + {pokemon_name}",
 			description: "Retrieves Pokemon from Pokedex and provides information about its types and abilities.",
 			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Prints all caught Pokemon in your Pokedex",
+			callback:    commandPokedex,
 		},
 	}
 }
